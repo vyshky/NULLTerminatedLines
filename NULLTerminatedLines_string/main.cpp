@@ -170,6 +170,7 @@ int bin_to_dec(char str[])
 
 	for (int i = 0; number != 0; i++)
 	{
+		if (number % 10 > 1)return 0;
 		buffer = 2;
 
 		if (number % 10 == 0)
