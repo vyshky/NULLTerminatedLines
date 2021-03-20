@@ -5,6 +5,10 @@ using namespace std;
 
 
 void InputLine(char str[], const int n);
+int StrLen(char str[]);
+
+bool is_mac_address(char str[]);
+bool is_ip_address(char str[]);
 
 void to_upper(char str[]);//Переводит строку в верхний регистр
 void to_lower(char str[]);	//Переводит строку в нижний регистр
@@ -16,8 +20,11 @@ void shrink(char str[]);	//Убирает из строки лишние про�
 bool is_palindrome(char str[]);	//Определяет, является ли строка палиндромом
 bool is_int_number(char str[]); //Определяет, является ли строка целым числом, то есть, состоит только из цифр
 
-int to_int_numer(char str[]); //Если строка является числом, то функция возвращает значение этого числа
+__int64 to_int_numer(char str[]); //Если строка является числом, то функция возвращает значение этого числа
 
+void remove_sumbol(char str[], char sumbol);
+
+int is_bin_number(char str[]);
 int  bin_to_dec(char str[]); //Если строка является двоичным числом, то функция возвращает его десятичное значение
 int  hex_to_dec(char str[]);	//Если строка является шестнадцатеричным числом, то функция возвращает его десятичное значение
 
@@ -48,6 +55,10 @@ int main()
 	cout << "Если строка является числом, то функция возвращает значение этого числа : " << to_int_numer(arr) << endl;
 	cout << "Если строка является двоичным числом, то функция возвращает его десятичное значение : " << bin_to_dec(arr) << endl;
 	cout << "Если строка является шестнадцатеричным числом, то функция возвращает его десятичное значение : " << hex_to_dec(arr) << endl;
+	cout << "Является ли строка IP-адресом : " << is_ip_address(arr) << endl;
+
+	cout << arr << endl;
+	cout << "Проверяет, является ли строка MAC-адресом : " << is_mac_address(arr) << endl;
 
 
 
@@ -62,6 +73,92 @@ void InputLine(char str[], const int n)
 	cin.getline(str, n);//CP1251 принимает только в этой кодировке
 	SetConsoleCP(866);
 	cout << str << endl;//CP866
+}
+
+int StrLen(char str[])
+{
+	int count = 0;
+	for (int i = 0; str[i]; i++)
+	{
+		count++;
+	}
+	return count;
+}
+
+bool is_mac_address(char str[])
+{
+	int count_dot = 0;
+	int count_number = 0;
+	for (int i = 0; str[i]; i++)
+	{
+		if (!(str[i] == '.' || str[i] == '-' || str[i] == ':'))count_number++;
+
+		if (count_number == 3)return 0;
+
+		if (i < 1 && (str[i] == '.' || str[i] == '-' || str[i] == ':'))	return 0;
+
+		if (str[i] == '.' || str[i] == '-' || str[i] == ':')
+		{
+			count_dot++;
+			count_number = 0;
+		}
+	}
+	if (count_dot != 5) return false;
+
+	for (int i = 0; str[i]; i++)
+	{
+		int weight = 1;
+		int count = 0;
+		for (int j = i; j < i + 2 && str[j] != 0; j++)
+		{
+			if (str[j] >= 'a' && str[j] <= 'f')
+			{
+				count += (str[j] - 87) * weight;
+				weight *= 16;
+			}
+			else if (str[j] != '.' && str[j] != '-' && str[j] != ':' && str[j] >= '0' && str[j] <= '9')
+			{
+				count *= 10;
+				count += str[j] - 48;
+			}
+			if (count > 255) return false;
+		}
+	}
+	return true;
+}
+
+bool is_ip_address(char str[])
+{
+	int count_dot = 0;
+	int count_number = 0;
+
+	for (int i = 0; str[i]; i++)
+	{
+		if (!(str[i] == '.'))count_number++;
+		if (str[i] == '.')
+		{
+			count_dot++;
+			count_number = 0;
+		}
+		if (count_number > 3)return 0;
+
+	}
+	if (count_dot != 3)return false;
+
+	for (int i = 0; str[i]; i++)
+	{
+		int count = 0;
+		for (int j = i; j < i + 3; j++)
+		{
+			if (str[j] != '.' && str[j] >= '0' && str[j] <= '9')
+			{
+				count *= 10;
+				count += str[j] - 48;
+			}
+			if (count > 255)return false;
+		}
+	}
+	return true;
 }
 
 void to_upper(char str[])
@@ -90,7 +187,7 @@ void capitalize(char str[])
 
 void shrink(char str[])
 {
-	for (int i = 0, count = i; str[i]; i++, count++)
+	for (int i = 0, count = 0; str[i]; i++, count++)
 	{
 		while (str[count] == 32 && str[count + 1] == 32)
 		{
@@ -103,139 +200,105 @@ void shrink(char str[])
 bool is_palindrome(char str[])
 {
 	int count = 0;
+
 	for (int i = 1; str[i]; i++)
 	{
 		count += sizeof(str[0]);
 	}
-	for (int i = 0; i <= count; i++, count--)
+
+	for (int i = 0; i <= count; i++)
 	{
-		if (str[i] == str[count]);
-		else
-		{
-			return 0;
-		}
+		if (str[i] != str[count - i])	return false;
+
 	}
-	return 1;
+	return true;
 }
 
 bool is_int_number(char str[])
 {
 	for (int i = 0; str[i]; i++)
 	{
-		if (str[i] >= 48 && str[i] <= 57 || str[i] >= 65 && str[i] <= 75 || str[i] >= 97 && str[i] <= 102);
-		else
-		{
-			return 0;
-		}
+		if (!(str[i] >= '0' && str[i] <= '9') && str[i] != ' ')
+			return false;
+
+		if (str[i] == ' ' && str[i + 1] == ' ')
+			return false;
 	}
-	return 1;
+	return true;
 }
 
-int to_int_numer(char str[])
+__int64 to_int_numer(char str[])
 {
-	int number = is_int_number(str);
-	if (number == 0)return 0;
-	else
+	if (!is_int_number(str)) return 0;
+	__int64 number = 0;
+	for (int i = 0; str[i]; i++)
 	{
-		number = 0;
-		int key = 0;
-		for (int i = 0; str[i]; i++)
+		if (str[i] != ' ')
 		{
-			switch (str[i])
-			{
-			case '0':key = 0; break;
-			case '1':key = 1; break;
-			case '2':key = 2; break;
-			case '3':key = 3; break;
-			case '4':key = 4; break;
-			case '5':key = 5; break;
-			case '6':key = 6; break;
-			case '7':key = 7; break;
-			case '8':key = 8; break;
-			case '9':key = 9; break;
-			}
-			number += key;
-			number *= 10;
+			number *= 10; // Сдвигаем число на 1 разряд в лево , чтобы освободить младший разряд для следующее цифры
+			number += str[i] - 48;// 48 в ASCII-код символ '0'
 		}
 	}
-	return number / 10;
+	return number;
+}
+
+void remove_sumbol(char str[], char sumbol)
+{
+	for (int i = 0; i < str[i]; i++)
+	{
+		if (str[i] == sumbol)
+		{
+			for (int j = i; str[j]; j++)
+			{
+				str[j] = str[j + 1];
+			}
+			i--;
+		}
+	}
+}
+
+int is_bin_number(char str[])
+{
+	for (int i = 0; str[i]; i++)
+	{
+		if (str[i] != '0' && str[i] != '1' && str[i] != ' ')return false;
+		if (str[i - 1] == ' ' && str[i] == ' ' && str[i + 1])return false;
+	}
+	return true;
 }
 
 int bin_to_dec(char str[])
 {
-	int number = to_int_numer(str);
-	int buffer;
-	int sum = 0;
-
-
-	for (int i = 0; number != 0; i++)
+	if (!is_bin_number(str))return 0;
+	int decimal = 0;
+	int weight = 1;
+	int n = strlen(str);
+	for (int i = n - 1; i >= 0; i--)
 	{
-		if (number % 10 > 1)return 0;
-		buffer = 2;
-
-		if (number % 10 == 0)
+		if (str[i] != ' ')
 		{
-			number /= 10;
-			continue;
+			decimal += (str[i] - 48) * weight;
+			weight *= 2;
 		}
-
-		if (i == 0)	buffer = 1;
-
-		for (int j = i; j > 1; j--)	buffer *= 2;
-
-		number /= 10;
-		sum += buffer;
 	}
-	return sum;
+	return decimal;
 }
 
 int hex_to_dec(char str[])
 {
-	int buffer = 0, number = 0, sum = 0;
+	int count = StrLen(str);
+	to_lower(str);
 
-	int i = 0;
+	int decimal = 0;
+	int weight = 1;
 
-	for (; str[i] != '\0'; i++) {}
-	i--;
-
-	for (int i2 = 0; str[i] >= 0; i--, i2++)
+	for (int i = count - 1; i >= 0; i--)
 	{
-		buffer = 16;
-		if (i2 == 0)	buffer = 1;
-		for (int j = i2; j > 1; j--)	buffer *= 16;
-
-		switch (str[i])
-		{
-		case '0':number = 0; break;
-		case '1':number = 1; break;
-		case '2':number = 2; break;
-		case '3':number = 3; break;
-		case '4':number = 4; break;
-		case '5':number = 5; break;
-		case '6':number = 6; break;
-		case '7':number = 7; break;
-		case '8':number = 8; break;
-		case '9':number = 9; break;
-		case 'A':number = 10; break;
-		case 'B':number = 11; break;
-		case 'C':number = 12; break;
-		case 'D':number = 13; break;
-		case 'E':number = 14; break;
-		case 'F':number = 15; break;
-		case 'a':number = 10; break;
-		case 'b':number = 11; break;
-		case 'c':number = 12; break;
-		case 'd':number = 13; break;
-		case 'e':number = 14; break;
-		case 'f':number = 15; break;
-		}
-
-		if (number >= 10 && number <= 15) buffer *= number;
-		else if (number >= 0 && number <= 9) buffer *= number;
-
-		sum += buffer;
+		if (!(str[i] >= 'a' && str[i] <= 'f') || (str[i] >= '0' && str[i] <= '9'))	return 0;
+		if (str[i] >= '0' && str[i] <= '9' && str[i] != ' ')decimal += (str[i] - 48) * weight;
+		if (str[i] >= 'a' && str[i] <= 'f' && str[i] != ' ')decimal += (str[i] - 87) * weight;
+		weight *= 16;
 	}
-
-	return sum;
+	return decimal;
 }
 
